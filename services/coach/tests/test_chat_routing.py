@@ -2,9 +2,9 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+from relink_coach import agents
 from relink_coach.providers.config import Settings
 from relink_coach.providers.router import chat
-from relink_coach import agents
 from relink_coach.providers.types import ChatResult
 
 
@@ -51,6 +51,6 @@ async def test_agents_json_fallback_paths():
         ),
     ):
         data = await agents.generate_plans({})
-        assert "plans" in data
+        assert data.plans
         data2 = await agents.profile_habit({})
-        assert "stageOfChange" in data2 or "suggestedPlans" in data2
+        assert data2.stageOfChange or data2.suggestedPlans

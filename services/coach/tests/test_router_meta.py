@@ -3,7 +3,13 @@ import os
 
 os.environ.setdefault("RELINK_LLM_PROVIDER", "mock")
 
-from relink_coach.llm import chat, health_info, ollama_model_id, resolve_provider, _strip_provider_prefix
+from relink_coach.llm import (
+    _strip_provider_prefix,
+    chat,
+    health_info,
+    ollama_model_id,
+    resolve_provider,
+)
 from relink_coach.providers.config import Settings, clear_settings_cache
 from relink_coach.safety import classify_safety
 

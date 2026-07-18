@@ -16,15 +16,17 @@ def mock_reply(messages: list[dict[str, str]], *, role: str = "coach") -> str:
         return json.dumps(plans_fallback())
     if mode == "urge":
         return (
-            "You're in Urge SOS. Name the urge without fighting it — notice where it sits in your body. "
-            "Rate it 0–10. Breathe slowly for 90 seconds; urges rise and fall like a wave. "
-            "When it drops even one point, do your if-then: plug the phone away or leave the room. "
+            "You're in Urge SOS. Name the urge without fighting it — notice "
+            "where it sits in your body. Rate it 0–10. Breathe slowly for 90 seconds; "
+            "urges rise and fall like a wave. When it drops even one point, do your "
+            "if-then: plug the phone away or leave the room. "
             "You already voted for who you're becoming by opening Relink."
         )
     if mode == "slip":
         return (
-            "A slip is data, not identity. What happened right before? Update your high-risk map. "
-            "For the next 24 hours: one small plan, one check-in, one person or place that supports you. "
+            "A slip is data, not identity. What happened right before? "
+            "Update your high-risk map. For the next 24 hours: one small plan, "
+            "one check-in, one person or place that supports you. "
             "You practiced recovery — that counts."
         )
     if mode == "insight":
@@ -34,8 +36,9 @@ def mock_reply(messages: list[dict[str, str]], *, role: str = "coach") -> str:
 
     snippet = user[:120] if user else "your habit"
     return (
-        f"Thanks for showing up. About “{snippet}…” — what matters most to you about changing this? "
-        "I'm here to draw out your own reasons, not lecture. What's one step that feels doable today?"
+        f"Thanks for showing up. About “{snippet}…” — what matters most to you "
+        "about changing this? I'm here to draw out your own reasons, not lecture. "
+        "What's one step that feels doable today?"
     )
 
 

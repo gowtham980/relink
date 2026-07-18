@@ -10,31 +10,31 @@ from relink_coach import agents
 @pytest.mark.asyncio
 async def test_profile_has_disclaimer():
     data = await agents.profile_habit({"habitType": "nicotine", "values": ["health"]})
-    assert data.get("disclaimer")
-    assert data.get("provider_used") == "mock"
+    assert data.disclaimer
+    assert data.provider_used == "mock"
 
 
 @pytest.mark.asyncio
 async def test_urge_safety_short_circuit():
     data = await agents.urge_turn({"message": "I want to end my life", "step": 0})
-    assert data["blocked"] is True
-    assert data["provider_used"] == "safety"
-    assert "reply" not in data or data["reply"]
+    assert data.blocked is True
+    assert data.provider_used == "safety"
+    assert data.reply
 
 
 @pytest.mark.asyncio
 async def test_plans_structure():
     data = await agents.generate_plans({"context": {}})
-    assert "plans" in data
-    assert isinstance(data["plans"], list)
-    assert data["plans"]
+    assert data.plans
+    assert isinstance(data.plans, list)
+    assert data.plans[0].ifCue
 
 
 @pytest.mark.asyncio
 async def test_nudge_short():
     data = await agents.nudge_compose({"values": ["presence"]})
-    assert data.get("nudge")
-    assert len(data["nudge"]) < 500
+    assert data.nudge
+    assert len(data.nudge) < 500
 
 
 @pytest.mark.asyncio
@@ -48,9 +48,9 @@ async def test_coach_accepts_workflow_context():
             "lastSlip": {"context": "late night alone", "next24h": "walk"},
         }
     )
-    assert data.get("blocked") is False
-    assert data.get("reply")
-    assert data.get("disclaimer")
+    assert data.blocked is False
+    assert data.reply
+    assert data.disclaimer
 
 
 @pytest.mark.asyncio
@@ -62,5 +62,5 @@ async def test_urge_accepts_active_plans():
             "activePlans": [{"ifCue": "unlock phone", "thenAction": "open Relink"}],
         }
     )
-    assert data.get("blocked") is False
-    assert data.get("reply")
+    assert data.blocked is False
+    assert data.reply

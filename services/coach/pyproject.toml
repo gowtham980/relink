@@ -1,6 +1,6 @@
 [project]
 name = "relink-coach"
-version = "0.2.0"
+version = "0.3.0"
 description = "Relink multi-agent habit coach — Google ADK graph, Ollama Cloud, Vertex Gemini fallback"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,9 +13,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0", "ruff>=0.6.0", "mypy>=1.11.0"]
 adk = ["google-adk>=1.0.0", "litellm>=1.40.0"]
-all = ["google-adk>=1.0.0", "litellm>=1.40.0", "pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0"]
+all = ["google-adk>=1.0.0", "litellm>=1.40.0", "pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0", "ruff>=0.6.0", "mypy>=1.11.0"]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -37,3 +37,27 @@ source = ["relink_coach"]
 fail_under = 80
 exclude_lines = ["pragma: no cover", "if __name__"]
 omit = ["relink_coach/adk_app.py"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "W"]
+ignore = ["B008"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+exclude = ["relink_coach/adk_app.py"]
+
+[[tool.mypy.overrides]]
+module = "google.*"
+ignore_missing_imports = true

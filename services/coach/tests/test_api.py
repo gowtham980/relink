@@ -47,10 +47,10 @@ def test_urge_ok():
     )
     assert r.status_code == 200
     data = r.json()
-    assert data.get("blocked") is False
-    assert data.get("reply")
-    assert data.get("disclaimer")
-    assert data.get("provider_used") in ("mock", "ollama", "gemini", "safety")
+    assert data["blocked"] is False
+    assert data["reply"]
+    assert data["disclaimer"]
+    assert data["provider_used"] in ("mock", "ollama", "gemini", "safety")
 
 
 def test_urge_crisis_blocks_without_llm_content():
@@ -71,8 +71,8 @@ def test_coach_ok():
         json={"action": "coach", "payload": {"message": "Why is change hard?"}},
     )
     assert r.status_code == 200
-    assert r.json().get("reply")
-    assert r.json().get("disclaimer")
+    assert r.json()["reply"]
+    assert r.json()["disclaimer"]
 
 
 def test_slip_ok():
@@ -95,7 +95,7 @@ def test_profile_ok():
     assert r.status_code == 200
     data = r.json()
     assert "stageOfChange" in data or "suggestedPlans" in data
-    assert data.get("disclaimer")
+    assert data["disclaimer"]
 
 
 def test_plans_ok():
@@ -128,7 +128,7 @@ def test_nudge_ok():
         json={"action": "nudge", "payload": {"values": ["family"]}},
     )
     assert r.status_code == 200
-    assert r.json().get("nudge")
+    assert r.json()["nudge"]
 
 
 def test_medical_safety_on_coach():

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 
 from ..mock_replies import mock_reply
 from .config import Settings, get_settings

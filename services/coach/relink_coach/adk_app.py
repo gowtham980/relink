@@ -54,6 +54,7 @@ def build_adk_agents() -> Any:
 
     api_base = os.getenv("OLLAMA_API_BASE", "https://ollama.com/v1")
     api_key = os.getenv("OLLAMA_API_KEY", "")
+
     def _bare(m: str) -> str:
         m = (m or "").strip()
         return m.split("/", 1)[1] if "/" in m else m
@@ -107,7 +108,8 @@ def build_adk_agents() -> Any:
         model=_llm(coach_model),
         description="Motivational interviewing coach",
         instruction=(
-            "Use MI: open questions, reflections, elicit change talk. No lectures. Not medical care."
+            "Use MI: open questions, reflections, elicit change talk. "
+            "No lectures. Not medical care."
         ),
     )
     insight = Agent(

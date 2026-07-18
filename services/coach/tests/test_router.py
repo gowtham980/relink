@@ -15,11 +15,17 @@ def test_resolve_ollama_with_key():
 
 
 def test_resolve_ollama_no_key_falls_mock():
-    assert resolve_provider(Settings(provider="ollama", api_key="", allow_mock_fallback=True)) == "mock"
+    assert (
+        resolve_provider(Settings(provider="ollama", api_key="", allow_mock_fallback=True))
+        == "mock"
+    )
 
 
 def test_resolve_ollama_no_key_strict():
-    assert resolve_provider(Settings(provider="ollama", api_key="", allow_mock_fallback=False)) == "ollama"
+    assert (
+        resolve_provider(Settings(provider="ollama", api_key="", allow_mock_fallback=False))
+        == "ollama"
+    )
 
 
 def test_health_bare_ids():
@@ -82,12 +88,15 @@ async def test_chat_ollama_to_vertex_fallback():
         allow_mock_fallback=False,
         gcp_project="proj",
     )
-    with patch(
-        "relink_coach.providers.router.chat_ollama",
-        new=AsyncMock(side_effect=RuntimeError("timeout")),
-    ), patch(
-        "relink_coach.providers.router.chat_vertex",
-        new=AsyncMock(return_value="from gemini"),
+    with (
+        patch(
+            "relink_coach.providers.router.chat_ollama",
+            new=AsyncMock(side_effect=RuntimeError("timeout")),
+        ),
+        patch(
+            "relink_coach.providers.router.chat_vertex",
+            new=AsyncMock(return_value="from gemini"),
+        ),
     ):
         r = await chat([{"role": "user", "content": "x"}], settings=s)
     assert r.provider_used == "gemini"
@@ -98,9 +107,11 @@ async def test_chat_ollama_to_vertex_fallback():
 @pytest.mark.asyncio
 async def test_chat_strict_raises():
     s = Settings(provider="ollama", api_key="k", fallback="none", allow_mock_fallback=False)
-    with patch(
-        "relink_coach.providers.router.chat_ollama",
-        new=AsyncMock(side_effect=RuntimeError("boom")),
+    with (
+        patch(
+            "relink_coach.providers.router.chat_ollama",
+            new=AsyncMock(side_effect=RuntimeError("boom")),
+        ),
+        pytest.raises(RuntimeError, match="boom"),
     ):
-        with pytest.raises(RuntimeError, match="boom"):
-            await chat([{"role": "user", "content": "x"}], settings=s)
+        await chat([{"role": "user", "content": "x"}], settings=s)

@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import os
-from typing import Optional
 
 import httpx
 
-_client: Optional[httpx.AsyncClient] = None
+_client: httpx.AsyncClient | None = None
 
 OLLAMA_TIMEOUT = float(os.getenv("RELINK_OLLAMA_TIMEOUT", "45"))
 

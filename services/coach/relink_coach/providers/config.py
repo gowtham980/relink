@@ -36,8 +36,10 @@ class Settings:
         return self.struct_model_id() if role == "struct" else self.coach_model_id()
 
     def vertex_ready(self) -> bool:
-        return bool(self.gcp_project) or bool(os.getenv("GOOGLE_APPLICATION_CREDENTIALS")) or bool(
-            os.getenv("K_SERVICE")
+        return (
+            bool(self.gcp_project)
+            or bool(os.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
+            or bool(os.getenv("K_SERVICE"))
         )
 
 

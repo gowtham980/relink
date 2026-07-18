@@ -54,7 +54,7 @@ async def chat_vertex(
         text = getattr(resp, "text", None) or ""
         if not text and getattr(resp, "candidates", None):
             try:
-                text = resp.candidates[0].content.parts[0].text
+                text = resp.candidates[0].content.parts[0].text  # type: ignore[index,union-attr]
             except Exception:
                 text = str(resp)
         if not text:

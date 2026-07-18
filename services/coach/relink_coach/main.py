@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import os
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import Any, cast
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -15,6 +16,7 @@ from . import agents
 from .adk_app import graph_info
 from .http_client import shutdown_http, startup_http
 from .llm import health_info
+from .models import InvokeResponse
 
 load_dotenv()
 
@@ -52,7 +54,12 @@ app.add_middleware(
 
 
 class InvokeBody(BaseModel):
-    action: str = Field(..., min_length=1, max_length=32, description="profile|plans|urge|slip|coach|insight|nudge")
+    action: str = Field(
+        ...,
+        min_length=1,
+        max_length=32,
+        description="profile|plans|urge|slip|coach|insight|nudge",
+    )
     payload: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -70,7 +77,7 @@ async def agents_graph() -> dict[str, Any]:
 
 
 @app.post("/v1/invoke")
-async def invoke(body: InvokeBody) -> dict[str, Any]:
+async def invoke(body: InvokeBody) -> InvokeResponse:
     action = body.action.lower().strip()
     handlers = {
         "profile": agents.profile_habit,
@@ -86,7 +93,10 @@ async def invoke(body: InvokeBody) -> dict[str, Any]:
         raise HTTPException(400, f"Unknown action: {action}")
     if len(str(body.payload)) > 50_000:
         raise HTTPException(413, "Payload too large")
-    return await fn(body.payload)
+    result = await fn(body.payload)
+    if not isinstance(result, BaseModel):
+        raise HTTPException(500, "Internal response error")
+    return cast(InvokeResponse, result)
 
 
 def run() -> None:

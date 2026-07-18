@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from relink_coach.json_util import extract_json
@@ -19,5 +21,5 @@ def test_empty_raises():
 
 
 def test_invalid_raises():
-    with pytest.raises(Exception):
+    with pytest.raises((ValueError, json.JSONDecodeError)):
         extract_json("not json at all")

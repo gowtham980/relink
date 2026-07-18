@@ -55,8 +55,9 @@ def classify_safety(text: str) -> SafetyResult:
                 kind="medical",
                 message=(
                     "Stopping alcohol or benzodiazepines abruptly can be medically dangerous. "
-                    "Please talk to a licensed clinician or local addiction services before changing "
-                    "medication or heavy alcohol use. Relink cannot give detox dosing advice."
+                    "Please talk to a licensed clinician or local addiction "
+                    "services before changing medication or heavy alcohol use. "
+                    "Relink cannot give detox dosing advice."
                 ),
                 resources=[
                     {"label": "Find professional help (IASP)", "url": IASP_URL},

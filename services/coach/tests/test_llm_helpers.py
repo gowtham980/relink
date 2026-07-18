@@ -1,4 +1,9 @@
-from relink_coach.llm import _classify_error, _strip_provider_prefix, ollama_model_id, resolve_provider
+from relink_coach.llm import (
+    _classify_error,
+    _strip_provider_prefix,
+    ollama_model_id,
+    resolve_provider,
+)
 from relink_coach.providers.config import Settings
 
 
