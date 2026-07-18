@@ -90,12 +90,14 @@ async def urge_turn(payload: dict[str, Any]) -> dict[str, Any]:
     message = payload.get("message", "")
     step = int(payload.get("step", 0) or 0)
     history = payload.get("history", [])
+    active_plans = payload.get("activePlans", [])
     safety = await run_safety(str(message))
     if safety.blocked:
         return _safety_block(safety)
     system = (
         "MODE:URGE\nYou run Relink Urge SOS (urge surfing). Short, calm, 3-6 sentences. "
         f"Protocol step index: {step}. Guide: name urge → rate 0-10 → breathe/surf → if-then → substitute. "
+        f"User's active if-then plans: {active_plans}. Prefer reminding them of their own plan. "
         "Never shame. Not therapy. No medical advice."
     )
     msgs: list[dict[str, str]] = [{"role": "system", "content": system}]
@@ -142,13 +144,20 @@ async def coach_turn(payload: dict[str, Any]) -> dict[str, Any]:
     mode = payload.get("mode", "mi")
     history = payload.get("history", [])
     profile = payload.get("profile", {})
+    recent_checkins = payload.get("recentCheckIns", [])
+    active_plans = payload.get("activePlans", [])
+    last_slip = payload.get("lastSlip")
     safety = await run_safety(str(message))
     if safety.blocked:
         return _safety_block(safety)
     system = (
         f"MODE:MI\nYou are Relink adaptive coach using motivational interviewing. "
         f"User mode hint: {mode}. Profile: {profile}. "
-        "Elicit change talk, reflect, no lectures. Wellness tool only."
+        f"Recent check-ins: {recent_checkins}. "
+        f"Active if-then plans: {active_plans}. "
+        f"Last slip repair: {last_slip}. "
+        "Reference their real data when relevant. Elicit change talk, reflect, no lectures. "
+        "Wellness tool only."
     )
     msgs: list[dict[str, str]] = [{"role": "system", "content": system}]
     for h in history[-8:]:

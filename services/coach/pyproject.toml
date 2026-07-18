@@ -13,9 +13,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0"]
 adk = ["google-adk>=1.0.0", "litellm>=1.40.0"]
-all = ["google-adk>=1.0.0", "litellm>=1.40.0", "pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0"]
+all = ["google-adk>=1.0.0", "litellm>=1.40.0", "pytest>=8.0.0", "pytest-asyncio>=0.24.0", "pytest-cov>=5.0.0", "respx>=0.21.0"]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -30,9 +30,10 @@ asyncio_mode = "auto"
 addopts = "--cov=relink_coach --cov-report=term-missing"
 
 [tool.coverage.run]
-omit = ["relink_coach/adk_app.py"]
+omit = ["relink_coach/adk_app.py", "relink_coach/providers/vertex.py"]
 source = ["relink_coach"]
 
 [tool.coverage.report]
-fail_under = 72
+fail_under = 80
 exclude_lines = ["pragma: no cover", "if __name__"]
+omit = ["relink_coach/adk_app.py"]

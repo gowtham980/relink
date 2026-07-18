@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { loadState, saveState, uid } from "@/lib/store";
 import { invokeCoach } from "@/lib/coach-client";
 import { repairCount } from "@/domain/metrics";
 
-export default function SlipPage() {
+function SlipForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [context, setContext] = useState("");
   const [next24h, setNext24h] = useState("");
   const [reply, setReply] = useState("");
@@ -16,7 +18,9 @@ export default function SlipPage() {
 
   useEffect(() => {
     if (!loadState().onboarded) router.replace("/onboarding");
-  }, [router]);
+    const pre = searchParams.get("context");
+    if (pre) setContext(pre);
+  }, [router, searchParams]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,10 +42,13 @@ export default function SlipPage() {
       ];
       state.repairs = repairCount(state.slips);
       if (next24h.trim()) {
+        const cue = context.trim()
+          ? `After: ${context.trim().slice(0, 80)}`
+          : "In the next 24 hours after a slip";
         state.plans = [
           {
             id: uid(),
-            ifCue: "In the next 24 hours after a slip",
+            ifCue: cue,
             thenAction: next24h.trim(),
             active: true,
           },
@@ -58,11 +65,7 @@ export default function SlipPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="font-display text-3xl font-semibold">Slip recovery</h1>
-      <p className="text-dusk">
-        A lapse is not a relapse. We repair the plan — we don&apos;t erase your identity.
-      </p>
+    <>
       <form onSubmit={submit} className="card space-y-3 p-5">
         <div>
           <label className="label" htmlFor="ctx">
@@ -99,12 +102,31 @@ export default function SlipPage() {
         <div className="card space-y-2 p-5" role="status">
           <p className="text-sm">{reply}</p>
           {done && (
-            <a href="/plans" className="text-sm font-semibold text-pine underline">
-              View updated plans →
-            </a>
+            <div className="flex flex-wrap gap-3 text-sm font-semibold text-pine">
+              <Link href="/plans" className="underline">
+                View updated plans →
+              </Link>
+              <Link href="/coach" className="underline">
+                Talk with coach →
+              </Link>
+            </div>
           )}
         </div>
       )}
+    </>
+  );
+}
+
+export default function SlipPage() {
+  return (
+    <div className="mx-auto max-w-lg space-y-4">
+      <h1 className="font-display text-3xl font-semibold">Slip recovery</h1>
+      <p className="text-dusk">
+        A lapse is not a relapse. We repair the plan — we don&apos;t erase your identity.
+      </p>
+      <Suspense fallback={<div className="card p-5 text-sm text-dusk">Loading…</div>}>
+        <SlipForm />
+      </Suspense>
     </div>
   );
 }

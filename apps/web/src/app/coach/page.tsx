@@ -38,7 +38,23 @@ export default function CoachPage() {
           values: state.values,
           identity: state.identity,
           triggers: state.triggers,
+          riskWindows: state.riskWindows,
+          stageOfChange: state.stageOfChange,
         },
+        recentCheckIns: state.checkIns.slice(0, 5).map((c) => ({
+          date: c.date,
+          mood: c.mood,
+          urgeLevel: c.urgeLevel,
+          slipped: c.slipped,
+          note: c.note,
+        })),
+        activePlans: state.plans
+          .filter((p) => p.active)
+          .slice(0, 4)
+          .map((p) => ({ ifCue: p.ifCue, thenAction: p.thenAction })),
+        lastSlip: state.slips[0]
+          ? { at: state.slips[0].at, context: state.slips[0].context, next24h: state.slips[0].next24h }
+          : null,
       });
       if (res.blocked) {
         setSafety(String(res.reply));
@@ -76,7 +92,7 @@ export default function CoachPage() {
         <h1 className="font-display text-3xl font-semibold">Adaptive coach</h1>
         <p className="text-sm text-dusk">
           Mode: <span className="rounded-full bg-pine/10 px-2 py-0.5 font-medium text-pine">MI</span>{" "}
-          — motivational interviewing, not lectures.
+          — uses your check-ins, plans, and repairs — not lectures.
         </p>
       </div>
 
@@ -93,7 +109,8 @@ export default function CoachPage() {
       <div className="card min-h-[280px] space-y-3 p-4" aria-live="polite">
         {state.coachHistory.length === 0 && (
           <p className="text-sm text-dusk">
-            Ask about motivation, barriers, or what success looks like this week.
+            Ask about motivation, barriers, or what success looks like this week. The coach can see
+            your recent logs and active if-then plans.
           </p>
         )}
         {state.coachHistory.map((m, i) => (

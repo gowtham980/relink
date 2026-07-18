@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { averageUrge, daysPracticed, repairCount, slipRate } from "./metrics";
+import { averageUrge, daysPracticed, parsePlanEdit, repairCount, slipRate } from "./metrics";
 
 describe("metrics", () => {
   it("counts unique practice days", () => {
@@ -37,5 +37,18 @@ describe("metrics", () => {
 
   it("slip rate empty is 0", () => {
     expect(slipRate([])).toBe(0);
+  });
+
+  it("parses if-then plan edits", () => {
+    expect(parsePlanEdit("If it is 20:30 and I am alone, then I start a 15-minute walk.")).toEqual({
+      ifCue: "it is 20:30 and I am alone",
+      thenAction: "I start a 15-minute walk.",
+    });
+  });
+
+  it("falls back when plan edit is freeform", () => {
+    const p = parsePlanEdit("Add: walk after dinner");
+    expect(p.ifCue).toBeTruthy();
+    expect(p.thenAction).toContain("walk after dinner");
   });
 });

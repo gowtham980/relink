@@ -35,3 +35,32 @@ async def test_nudge_short():
     data = await agents.nudge_compose({"values": ["presence"]})
     assert data.get("nudge")
     assert len(data["nudge"]) < 500
+
+
+@pytest.mark.asyncio
+async def test_coach_accepts_workflow_context():
+    data = await agents.coach_turn(
+        {
+            "message": "What should I focus on tonight?",
+            "profile": {"habit": "scroll", "values": ["focus"]},
+            "recentCheckIns": [{"urgeLevel": 8, "mood": 2, "slipped": False}],
+            "activePlans": [{"ifCue": "phone in bed", "thenAction": "plug across room"}],
+            "lastSlip": {"context": "late night alone", "next24h": "walk"},
+        }
+    )
+    assert data.get("blocked") is False
+    assert data.get("reply")
+    assert data.get("disclaimer")
+
+
+@pytest.mark.asyncio
+async def test_urge_accepts_active_plans():
+    data = await agents.urge_turn(
+        {
+            "message": "urge is strong",
+            "step": 0,
+            "activePlans": [{"ifCue": "unlock phone", "thenAction": "open Relink"}],
+        }
+    )
+    assert data.get("blocked") is False
+    assert data.get("reply")

@@ -22,3 +22,17 @@ export function slipRate(checkIns: CheckIn[]): number {
   const slips = checkIns.filter((c) => c.slipped).length;
   return Math.round((slips / checkIns.length) * 100);
 }
+
+/** Best-effort parse of insight plan edits into if-then plans. */
+export function parsePlanEdit(text: string): { ifCue: string; thenAction: string } {
+  const raw = (text || "").trim();
+  const cleaned = raw.replace(/^add:\s*/i, "").trim();
+  const m = cleaned.match(/^if\s+(.+?)[,\s]+then\s+(.+)$/i);
+  if (m) {
+    return { ifCue: m[1].trim(), thenAction: m[2].trim() };
+  }
+  return {
+    ifCue: "When a familiar risk window appears",
+    thenAction: cleaned || "Pause, rate the urge 0–10, and open Relink Urge SOS",
+  };
+}

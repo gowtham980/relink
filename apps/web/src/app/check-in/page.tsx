@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { daysPracticed } from "@/domain/metrics";
 import { loadState, saveState, uid } from "@/lib/store";
 
@@ -12,6 +13,7 @@ export default function CheckInPage() {
   const [slipped, setSlipped] = useState(false);
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
+  const [slipHref, setSlipHref] = useState("/slip");
 
   useEffect(() => {
     if (!loadState().onboarded) router.replace("/onboarding");
@@ -20,10 +22,11 @@ export default function CheckInPage() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const state = loadState();
+    const date = new Date().toISOString();
     state.checkIns = [
       {
         id: uid(),
-        date: new Date().toISOString(),
+        date,
         mood,
         urgeLevel: urge,
         slipped,
@@ -33,6 +36,10 @@ export default function CheckInPage() {
     ];
     state.daysPracticed = daysPracticed(state.checkIns);
     saveState(state);
+    if (slipped) {
+      const ctx = note.trim() || `Slipped today · mood ${mood} · urge ${urge}`;
+      setSlipHref(`/slip?context=${encodeURIComponent(ctx)}`);
+    }
     setSaved(true);
   }
 
@@ -96,13 +103,13 @@ export default function CheckInPage() {
           <p className="text-sm text-pine" role="status">
             Saved.{" "}
             {slipped ? (
-              <a href="/slip" className="underline">
+              <Link href={slipHref} className="underline">
                 Open slip recovery →
-              </a>
+              </Link>
             ) : (
-              <a href="/home" className="underline">
+              <Link href="/home" className="underline">
                 Back home →
-              </a>
+              </Link>
             )}
           </p>
         )}

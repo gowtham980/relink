@@ -1,13 +1,15 @@
 import asyncio
 import os
 
-os.environ["RELINK_LLM_PROVIDER"] = "mock"
+os.environ.setdefault("RELINK_LLM_PROVIDER", "mock")
 
-from relink_coach.llm import chat, health_info, ollama_model_id, resolve_provider
+from relink_coach.llm import chat, health_info, ollama_model_id, resolve_provider, _strip_provider_prefix
+from relink_coach.providers.config import Settings, clear_settings_cache
 from relink_coach.safety import classify_safety
 
 
 def test_chat_mock_returns_meta():
+    clear_settings_cache()
     r = asyncio.run(
         chat(
             [
@@ -15,6 +17,7 @@ def test_chat_mock_returns_meta():
                 {"role": "user", "content": "help"},
             ],
             role="coach",
+            settings=Settings(provider="mock"),
         )
     )
     assert r.text
@@ -30,6 +33,7 @@ def test_struct_mock_profile_json():
                 {"role": "user", "content": "screen time"},
             ],
             role="struct",
+            settings=Settings(provider="mock"),
         )
     )
     assert "stageOfChange" in r.text or "suggestedPlans" in r.text
@@ -40,14 +44,12 @@ def test_safety_before_llm():
 
 
 def test_health_bare_model_ids():
-    info = health_info()
-    assert "/" not in info["model_coach"] or info["model_coach"].count("/") == 0
-    assert ollama_model_id("coach")
-    assert resolve_provider() in ("mock", "ollama", "gemini")
+    info = health_info(Settings(model_coach="glm-5.2", model_struct="kimi-k2.7-code"))
+    assert "/" not in info["model_coach"]
+    assert ollama_model_id("coach", Settings())
+    assert resolve_provider(Settings(provider="mock")) == "mock"
 
 
 def test_strip_openai_prefix():
-    from relink_coach.llm import _strip_provider_prefix
-
     assert _strip_provider_prefix("openai/glm-5.2") == "glm-5.2"
     assert _strip_provider_prefix("glm-5.2") == "glm-5.2"

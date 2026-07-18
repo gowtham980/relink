@@ -14,9 +14,15 @@ export default function UrgePage() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [loading, setLoading] = useState(false);
   const [blocked, setBlocked] = useState<{ reply: string; resources?: { label: string; url: string }[] } | null>(null);
+  const [planHint, setPlanHint] = useState<string>("");
 
   useEffect(() => {
-    if (!loadState().onboarded) router.replace("/onboarding");
+    const s = loadState();
+    if (!s.onboarded) router.replace("/onboarding");
+    else {
+      const top = s.plans.filter((p) => p.active)[0];
+      if (top) setPlanHint(`If ${top.ifCue}, then ${top.thenAction}`);
+    }
   }, [router]);
 
   async function send(e?: React.FormEvent) {
@@ -27,10 +33,15 @@ export default function UrgePage() {
     setMsgs((m) => [...m, { role: "user", content: userMsg }]);
     setLoading(true);
     try {
+      const s = loadState();
       const res = await invokeCoach("urge", {
         message: userMsg,
         step,
         history: msgs,
+        activePlans: s.plans
+          .filter((p) => p.active)
+          .slice(0, 3)
+          .map((p) => ({ ifCue: p.ifCue, thenAction: p.thenAction })),
       });
       if (res.blocked) {
         setBlocked({
@@ -60,6 +71,11 @@ export default function UrgePage() {
       <p className="text-dusk">
         Ride the wave. Step {Math.min(step + 1, 5)}/5 — name → rate → surf → if-then → substitute.
       </p>
+      {planHint && (
+        <p className="rounded-xl bg-pine/10 px-3 py-2 text-sm text-pine">
+          Your plan ready: <strong>{planHint}</strong>
+        </p>
+      )}
 
       {blocked ? (
         <div className="card space-y-3 border-coral/30 p-5" role="alert">
@@ -87,7 +103,7 @@ export default function UrgePage() {
           >
             {msgs.length === 0 && (
               <p className="text-sm text-dusk">
-                Press start to begin a guided urge protocol. Your plans stay on the Plans page.
+                Press start to begin a guided urge protocol. Your active if-then plans are included.
               </p>
             )}
             {msgs.map((m, i) => (

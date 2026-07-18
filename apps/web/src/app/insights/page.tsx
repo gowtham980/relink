@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { UserState } from "@/domain/types";
-import { averageUrge, daysPracticed, slipRate } from "@/domain/metrics";
-import { emptyState, loadState, saveState } from "@/lib/store";
+import { averageUrge, daysPracticed, parsePlanEdit, slipRate } from "@/domain/metrics";
+import { emptyState, loadState, saveState, uid } from "@/lib/store";
 import { invokeCoach } from "@/lib/coach-client";
 
 export default function InsightsPage() {
@@ -12,6 +13,7 @@ export default function InsightsPage() {
   const [state, setState] = useState<UserState>(emptyState());
   const [loading, setLoading] = useState(false);
   const [nudge, setNudge] = useState("");
+  const [applied, setApplied] = useState<string | null>(null);
 
   useEffect(() => {
     const s = loadState();
@@ -21,6 +23,7 @@ export default function InsightsPage() {
 
   async function generate() {
     setLoading(true);
+    setApplied(null);
     try {
       const res = await invokeCoach("insight", {
         checkIns: state.checkIns,
@@ -40,6 +43,20 @@ export default function InsightsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function applyEdit(text: string) {
+    const { ifCue, thenAction } = parsePlanEdit(text);
+    const next = {
+      ...state,
+      plans: [
+        { id: uid(), ifCue, thenAction, active: true },
+        ...state.plans,
+      ],
+    };
+    saveState(next);
+    setState(next);
+    setApplied(text);
   }
 
   return (
@@ -88,11 +105,31 @@ export default function InsightsPage() {
           {state.insight.suggestedPlanEdits.length > 0 && (
             <div>
               <p className="text-sm font-semibold">Suggested plan edits</p>
-              <ul className="mt-1 list-disc pl-5 text-sm text-dusk">
+              <ul className="mt-2 space-y-2">
                 {state.insight.suggestedPlanEdits.map((p) => (
-                  <li key={p}>{p}</li>
+                  <li
+                    key={p}
+                    className="flex flex-wrap items-start justify-between gap-2 rounded-xl bg-sand/80 px-3 py-2 text-sm"
+                  >
+                    <span className="text-dusk">{p}</span>
+                    <button
+                      type="button"
+                      className="btn-primary shrink-0 px-3 py-1 text-xs"
+                      onClick={() => applyEdit(p)}
+                    >
+                      Apply to Plans
+                    </button>
+                  </li>
                 ))}
               </ul>
+              {applied && (
+                <p className="mt-2 text-sm text-pine" role="status">
+                  Added to Plans.{" "}
+                  <Link href="/plans" className="underline">
+                    View plans →
+                  </Link>
+                </p>
+              )}
             </div>
           )}
         </div>
