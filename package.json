@@ -1,0 +1,13 @@
+{
+  "name": "relink",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Relink — GenAI habit coach",
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:coach": "cd services/coach && .venv/bin/uvicorn relink_coach.main:app --reload --port 8787",
+    "test:web": "npm --prefix apps/web test",
+    "test:coach": "cd services/coach && .venv/bin/pytest -q",
+    "build:web": "npm --prefix apps/web run build"
+  }
+}
