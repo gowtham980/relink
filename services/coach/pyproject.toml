@@ -1,7 +1,7 @@
 [project]
 name = "relink-coach"
-version = "0.1.0"
-description = "Relink multi-agent habit coach (ADK-style) with Ollama Cloud"
+version = "0.2.0"
+description = "Relink multi-agent habit coach — Google ADK graph, Ollama Cloud, Vertex Gemini fallback"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",
@@ -9,10 +9,13 @@ dependencies = [
   "pydantic>=2.0",
   "httpx>=0.27.0",
   "python-dotenv>=1.0.0",
+  "google-genai>=1.0.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0.0"]
+dev = ["pytest>=8.0.0", "pytest-asyncio>=0.24.0"]
+adk = ["google-adk>=1.0.0", "litellm>=1.40.0"]
+all = ["google-adk>=1.0.0", "litellm>=1.40.0", "pytest>=8.0.0", "pytest-asyncio>=0.24.0"]
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -21,3 +24,6 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["relink_coach*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

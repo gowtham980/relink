@@ -1,4 +1,4 @@
-"""FastAPI entry — Relink coach service."""
+"""FastAPI entry — Relink coach service (ADK graph + ModelRouter)."""
 
 from __future__ import annotations
 
@@ -11,11 +11,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from . import agents
-from .llm import MODEL_COACH, MODEL_STRUCT, resolve_provider
+from .adk_app import graph_info
+from .llm import health_info
 
 load_dotenv()
 
-app = FastAPI(title="Relink Coach", version="0.1.0")
+app = FastAPI(
+    title="Relink Coach",
+    version="0.2.0",
+    description="Multi-agent habit coach: Ollama Cloud primary, Vertex Gemini fallback, ADK graph",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,12 +36,14 @@ class InvokeBody(BaseModel):
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    return {
-        "ok": True,
-        "provider": resolve_provider(),
-        "model_coach": MODEL_COACH,
-        "model_struct": MODEL_STRUCT,
-    }
+    info = health_info()
+    info["agents"] = graph_info()
+    return info
+
+
+@app.get("/v1/agents")
+async def agents_graph() -> dict[str, Any]:
+    return graph_info()
 
 
 @app.post("/v1/invoke")
@@ -54,7 +61,6 @@ async def invoke(body: InvokeBody) -> dict[str, Any]:
     fn = handlers.get(action)
     if not fn:
         raise HTTPException(400, f"Unknown action: {action}")
-    # soft rate: payload size
     if len(str(body.payload)) > 50_000:
         raise HTTPException(413, "Payload too large")
     return await fn(body.payload)

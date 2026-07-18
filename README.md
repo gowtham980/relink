@@ -17,27 +17,32 @@ Open-source GenAI web app that helps people reduce harmful habits (screen time, 
 - Adaptive MI-style coach chat
 - Slip recovery (repairs metric, not toxic streaks)
 - Pattern insights + nudges
-- Safety classifier + crisis resources
-- **Ollama Cloud** multi-model coach (`glm-5.2`, `kimi-k2.7-code`) with **mock** fallback
+- Safety classifier + crisis resources (before any LLM)
+- **Google ADK** multi-agent graph (optional package)
+- **Ollama Cloud** primary (`glm-5.2` coach · `kimi-k2.7-code` structured)
+- **Vertex Gemini** automatic fallback on Ollama failure
+- Mock mode for offline / CI
 
 ## Stack
 
 | Layer | Tech |
 |-------|------|
 | Web | Next.js 15, TypeScript, Tailwind |
-| Coach | FastAPI multi-agent service (ADK-style protocols) |
-| LLM | Ollama Cloud OpenAI API · mock for offline/CI |
-| Store | Browser localStorage (Firebase-ready shape) |
+| Coach | FastAPI + ADK agent graph + ModelRouter |
+| LLM | Ollama Cloud → Vertex Gemini → mock |
+| Deploy | Cloud Run (`gcpdevelopment-464720`) |
+| Store | Browser localStorage (Firebase-ready) |
 
 ## Quick start
 
-### 1. Coach service (mock by default)
+### 1. Coach service
 
 ```bash
 cd services/coach
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
+# optional ADK: pip install -e ".[adk]"
 export RELINK_LLM_PROVIDER=mock
 uvicorn relink_coach.main:app --port 8787
 ```
@@ -53,7 +58,7 @@ npm run dev
 
 Open http://localhost:3000
 
-### Ollama Cloud (Pro/API)
+### Ollama Cloud + Vertex fallback
 
 ```bash
 export OLLAMA_API_KEY=your_key          # https://ollama.com/settings/keys
@@ -61,18 +66,42 @@ export OLLAMA_API_BASE=https://ollama.com/v1
 export RELINK_LLM_PROVIDER=ollama
 export RELINK_MODEL_COACH=openai/glm-5.2
 export RELINK_MODEL_STRUCT=openai/kimi-k2.7-code
+export RELINK_LLM_FALLBACK=vertex
+export RELINK_GEMINI_MODEL=gemini-2.0-flash
+export GOOGLE_CLOUD_PROJECT=gcpdevelopment-464720
+export GOOGLE_CLOUD_LOCATION=us-central1
+# gcloud auth application-default login   # for local Vertex
 uvicorn relink_coach.main:app --port 8787
 ```
 
-Keys stay on the **coach server only** — never in the browser.
+Keys stay on the **coach server only** — never in the browser. Never commit `.env`.
+
+### Live E2E
+
+```bash
+chmod +x scripts/e2e_coach.sh
+COACH_URL=http://127.0.0.1:8787 ./scripts/e2e_coach.sh
+```
+
+## Deploy (Google Cloud Run)
+
+```bash
+# 1) Store Ollama key in Secret Manager (once)
+echo -n 'YOUR_OLLAMA_KEY' | gcloud secrets create ollama-api-key \
+  --data-file=- --project=gcpdevelopment-464720
+# or: gcloud secrets versions add ollama-api-key --data-file=-
+
+# 2) Deploy both services
+chmod +x deploy/deploy.sh
+./deploy/deploy.sh
+```
+
+See `deploy/deploy.sh` for image build, IAM, and env wiring.
 
 ## Tests
 
 ```bash
-# Coach
-cd services/coach && pytest
-
-# Web domain
+cd services/coach && pytest -q
 cd apps/web && npm test
 ```
 
@@ -106,10 +135,13 @@ cd apps/web && npm test
 ## Architecture
 
 ```
-Browser (Next.js) → /api/coach BFF → FastAPI agents
-  SafetyGuard → profile | plans | urge | slip | coach | insight | nudge
-  Models: glm-5.2 (dialogue) · kimi-k2.7-code (structured JSON)
+Browser (Next.js) → /api/coach BFF → Cloud Run coach
+  SafetyGuard (rules) → ADK-mode agents
+  ModelRouter: Ollama Cloud → Vertex Gemini → mock
+  Models: glm-5.2 (dialogue) · kimi-k2.7-code (JSON)
 ```
+
+`GET /health` and `GET /v1/agents` expose provider, fallback, and agent graph.
 
 ## Ethics
 
