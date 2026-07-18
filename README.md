@@ -83,7 +83,18 @@ chmod +x scripts/e2e_coach.sh
 COACH_URL=http://127.0.0.1:8787 ./scripts/e2e_coach.sh
 ```
 
-## Deploy (Google Cloud Run)
+## Live deployment (Google Cloud Run)
+
+| Service | URL |
+|---------|-----|
+| **Web** | https://relink-web-kuw4c4fivq-uc.a.run.app |
+| **Coach** | https://relink-coach-kuw4c4fivq-uc.a.run.app |
+| Health | https://relink-coach-kuw4c4fivq-uc.a.run.app/health |
+
+Project: `gcpdevelopment-464720` · Region: `us-central1`  
+Primary LLM: Ollama Cloud · Fallback: Vertex Gemini · Secret: `ollama-api-key`
+
+### Redeploy
 
 ```bash
 # 1) Store Ollama key in Secret Manager (once)
