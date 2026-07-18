@@ -16,3 +16,8 @@ coverage/
 .gcloud/
 *.pem
 credentials.json
+
+.coverage
+htmlcov/
+*.tsbuildinfo
+.pytest_cache/
