@@ -112,9 +112,35 @@ See `deploy/deploy.sh` for image build, IAM, and env wiring.
 ## Tests
 
 ```bash
-cd services/coach && pytest -q
-cd apps/web && npm test
+# All
+npm test
+
+# Coach (mock provider, coverage)
+cd services/coach && pip install -e ".[dev]" && RELINK_LLM_PROVIDER=mock pytest -q --cov=relink_coach
+
+# Web
+cd apps/web && npm test && npx tsc --noEmit
 ```
+
+CI runs on every push (`.github/workflows/ci.yml`): pytest + cov ≥70%, vitest, `tsc`, `next build`.
+
+### Efficiency notes
+
+- Shared `httpx.AsyncClient` (connection reuse) via FastAPI lifespan
+- Ollama timeout default **45s**, then Vertex Gemini fallback
+- Token budgets by mode (urge ~350, nudge ~120, struct ~500–600)
+- Bad JSON → schema fallback (no double LLM call)
+- CORS restricted to web origins
+
+## Problem → product map (PromptWars)
+
+| Challenge need | Relink feature |
+|----------------|----------------|
+| Intelligent nudges | Values-based nudge composer + home prompts |
+| Personalized tracking | Check-ins, local metrics, insights |
+| Adaptive coaching | MI coach + Urge SOS protocol + profiler |
+| Slip recovery | Shame-free slip flow + repairs counter (not toxic streaks) |
+| Safety | Pre-LLM crisis/medical classifier + ethics resources |
 
 ## Use cases
 

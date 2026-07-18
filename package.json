@@ -6,8 +6,9 @@
   "scripts": {
     "dev:web": "npm --prefix apps/web run dev",
     "dev:coach": "cd services/coach && .venv/bin/uvicorn relink_coach.main:app --reload --port 8787",
+    "test": "npm run test:coach && npm run test:web",
     "test:web": "npm --prefix apps/web test",
-    "test:coach": "cd services/coach && .venv/bin/pytest -q",
+    "test:coach": "cd services/coach && .venv/bin/pytest -q --cov=relink_coach --cov-report=term-missing",
     "build:web": "npm --prefix apps/web run build"
   }
 }

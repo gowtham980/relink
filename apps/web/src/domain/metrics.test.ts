@@ -21,6 +21,10 @@ describe("metrics", () => {
     ).toBe(5);
   });
 
+  it("empty average is 0", () => {
+    expect(averageUrge([])).toBe(0);
+  });
+
   it("slip rate and repairs", () => {
     expect(
       slipRate([
@@ -29,5 +33,9 @@ describe("metrics", () => {
       ])
     ).toBe(50);
     expect(repairCount([{ id: "1", at: "x", context: "", next24h: "" }])).toBe(1);
+  });
+
+  it("slip rate empty is 0", () => {
+    expect(slipRate([])).toBe(0);
   });
 });

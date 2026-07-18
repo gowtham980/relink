@@ -103,6 +103,7 @@ export default function CoachPage() {
               m.role === "user" ? "ml-8 bg-pine/10" : "mr-8 bg-sand"
             }`}
           >
+            <span className="sr-only">{m.role}: </span>
             {m.content}
           </div>
         ))}
