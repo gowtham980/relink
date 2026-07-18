@@ -16,8 +16,9 @@ logger = logging.getLogger("relink.llm")
 PROVIDER = os.getenv("RELINK_LLM_PROVIDER", "mock").lower()
 API_BASE = os.getenv("OLLAMA_API_BASE", "https://ollama.com/v1").rstrip("/")
 API_KEY = os.getenv("OLLAMA_API_KEY", "")
-MODEL_COACH = os.getenv("RELINK_MODEL_COACH", "openai/glm-5.2")
-MODEL_STRUCT = os.getenv("RELINK_MODEL_STRUCT", "openai/kimi-k2.7-code")
+# Ollama Cloud expects bare ids (e.g. glm-5.2). Strip LiteLLM-style "openai/" if present.
+MODEL_COACH = os.getenv("RELINK_MODEL_COACH", "glm-5.2")
+MODEL_STRUCT = os.getenv("RELINK_MODEL_STRUCT", "kimi-k2.7-code")
 FALLBACK = os.getenv("RELINK_LLM_FALLBACK", "vertex").lower()  # vertex | none
 GEMINI_MODEL = os.getenv("RELINK_GEMINI_MODEL", "gemini-2.0-flash")
 GCP_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT", os.getenv("GCP_PROJECT", ""))
@@ -38,9 +39,16 @@ class ChatResult:
 
 
 def _strip_provider_prefix(model: str) -> str:
-    if "/" in model:
-        return model.split("/", 1)[1]
-    return model
+    """Normalize to Ollama Cloud model id (no openai/ or ollama_chat/ prefix)."""
+    m = (model or "").strip()
+    if "/" in m:
+        return m.split("/", 1)[1]
+    return m
+
+
+def ollama_model_id(role: str = "coach") -> str:
+    raw = MODEL_STRUCT if role == "struct" else MODEL_COACH
+    return _strip_provider_prefix(raw)
 
 
 def resolve_provider() -> str:
@@ -66,8 +74,8 @@ def health_info() -> dict[str, Any]:
         "ok": True,
         "provider": resolve_provider(),
         "fallback": FALLBACK if FALLBACK != "none" else None,
-        "model_coach": MODEL_COACH,
-        "model_struct": MODEL_STRUCT,
+        "model_coach": ollama_model_id("coach"),
+        "model_struct": ollama_model_id("struct"),
         "gemini_model": GEMINI_MODEL,
         "project": GCP_PROJECT or None,
         "location": GCP_LOCATION,
@@ -121,7 +129,7 @@ async def chat(
         text = await _chat_ollama(
             messages, role=role, temperature=temperature, max_tokens=max_tokens
         )
-        model = _strip_provider_prefix(MODEL_STRUCT if role == "struct" else MODEL_COACH)
+        model = ollama_model_id(role)
         return ChatResult(text=text, provider_used="ollama", model=model, fallback=False)
     except Exception as e:
         reason = _classify_error(e)
@@ -182,7 +190,7 @@ async def _chat_ollama(
 ) -> str:
     if not API_KEY:
         raise RuntimeError("OLLAMA_API_KEY not set")
-    model = _strip_provider_prefix(MODEL_STRUCT if role == "struct" else MODEL_COACH)
+    model = ollama_model_id(role)
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",

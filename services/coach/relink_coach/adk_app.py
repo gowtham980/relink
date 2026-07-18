@@ -29,8 +29,8 @@ AGENT_GRAPH: dict[str, Any] = {
         "NudgeComposerAgent",
     ],
     "models": {
-        "coach": os.getenv("RELINK_MODEL_COACH", "openai/glm-5.2"),
-        "struct": os.getenv("RELINK_MODEL_STRUCT", "openai/kimi-k2.7-code"),
+        "coach": os.getenv("RELINK_MODEL_COACH", "glm-5.2"),
+        "struct": os.getenv("RELINK_MODEL_STRUCT", "kimi-k2.7-code"),
         "fallback": os.getenv("RELINK_GEMINI_MODEL", "gemini-2.0-flash"),
     },
     "routing": {
@@ -54,8 +54,15 @@ def build_adk_agents() -> Any:
 
     api_base = os.getenv("OLLAMA_API_BASE", "https://ollama.com/v1")
     api_key = os.getenv("OLLAMA_API_KEY", "")
-    coach_model = os.getenv("RELINK_MODEL_COACH", "openai/glm-5.2")
-    struct_model = os.getenv("RELINK_MODEL_STRUCT", "openai/kimi-k2.7-code")
+    def _bare(m: str) -> str:
+        m = (m or "").strip()
+        return m.split("/", 1)[1] if "/" in m else m
+
+    coach_bare = _bare(os.getenv("RELINK_MODEL_COACH", "glm-5.2"))
+    struct_bare = _bare(os.getenv("RELINK_MODEL_STRUCT", "kimi-k2.7-code"))
+    # LiteLLM needs openai/ prefix for OpenAI-compatible Ollama Cloud
+    coach_model = f"openai/{coach_bare}"
+    struct_model = f"openai/{struct_bare}"
 
     def _llm(model: str) -> Any:
         return LiteLlm(model=model, api_base=api_base, api_key=api_key or "unused")

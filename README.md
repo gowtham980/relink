@@ -64,8 +64,8 @@ Open http://localhost:3000
 export OLLAMA_API_KEY=your_key          # https://ollama.com/settings/keys
 export OLLAMA_API_BASE=https://ollama.com/v1
 export RELINK_LLM_PROVIDER=ollama
-export RELINK_MODEL_COACH=openai/glm-5.2
-export RELINK_MODEL_STRUCT=openai/kimi-k2.7-code
+export RELINK_MODEL_COACH=glm-5.2
+export RELINK_MODEL_STRUCT=kimi-k2.7-code
 export RELINK_LLM_FALLBACK=vertex
 export RELINK_GEMINI_MODEL=gemini-2.0-flash
 export GOOGLE_CLOUD_PROJECT=gcpdevelopment-464720
