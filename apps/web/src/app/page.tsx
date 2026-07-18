@@ -21,12 +21,13 @@ export default function LandingPage() {
         </p>
         <div className="flex flex-wrap gap-3">
           <Link href="/onboarding" className="btn-primary">
-            Start free
+            Get started
           </Link>
           <Link href="/ethics" className="btn-ghost">
             Safety &amp; ethics
           </Link>
         </div>
+        <p className="text-sm text-dusk">Takes about a minute — no account needed.</p>
         <ul className="grid gap-2 text-sm text-dusk sm:grid-cols-2">
           <li className="card px-3 py-2">✓ Intelligent nudges</li>
           <li className="card px-3 py-2">✓ Personalized tracking</li>

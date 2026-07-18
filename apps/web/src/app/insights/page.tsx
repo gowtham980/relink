@@ -50,7 +50,7 @@ export default function InsightsPage() {
     const next = {
       ...state,
       plans: [
-        { id: uid(), ifCue, thenAction, active: true },
+        { id: uid(), ifCue, thenAction, active: true, origin: "ai" as const },
         ...state.plans,
       ],
     };
@@ -134,10 +134,30 @@ export default function InsightsPage() {
           )}
         </div>
       ) : (
-        <div className="card p-6 text-dusk">
-          {state.checkIns.length < 2
-            ? "Log a couple of check-ins, then generate an insight."
-            : "Ready when you are — generate your first insight card."}
+        <div className="card mx-auto max-w-md space-y-3 p-8 text-center">
+          <div
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-pine/10 text-2xl"
+            aria-hidden
+          >
+            {state.checkIns.length < 2 ? "📝" : "✨"}
+          </div>
+          <h2 className="font-display text-xl font-semibold">
+            {state.checkIns.length < 2 ? "Log a couple of check-ins first" : "Ready for your first insight"}
+          </h2>
+          <p className="text-sm text-dusk">
+            {state.checkIns.length < 2
+              ? "Patterns need a few honest logs. Check in today, then come back."
+              : "We’ll look at your check-ins and slips — no judgment, just patterns."}
+          </p>
+          {state.checkIns.length < 2 ? (
+            <Link href="/check-in" className="btn-primary inline-flex">
+              Go to check-in
+            </Link>
+          ) : (
+            <button type="button" className="btn-primary" disabled={loading} onClick={generate}>
+              {loading ? "Analyzing…" : "Generate insight"}
+            </button>
+          )}
         </div>
       )}
 

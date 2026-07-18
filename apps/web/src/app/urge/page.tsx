@@ -65,12 +65,41 @@ export default function UrgePage() {
     }
   }
 
+  const stepNum = Math.min(step + 1, 5);
+  const stepLabels = ["Name", "Rate", "Surf", "If-then", "Substitute"];
+
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <h1 className="font-display text-3xl font-semibold">Urge SOS</h1>
       <p className="text-dusk">
-        Ride the wave. Step {Math.min(step + 1, 5)}/5 — name → rate → surf → if-then → substitute.
+        Ride the wave. Step {stepNum}/5 — name → rate → surf → if-then → substitute.
       </p>
+      <div
+        className="space-y-2"
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={5}
+        aria-valuenow={stepNum}
+        aria-label={`Urge protocol step ${stepNum} of 5`}
+      >
+        <div className="grid grid-cols-5 gap-1.5">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className={`h-2 rounded-full transition ${
+                n <= stepNum ? "bg-pine" : "bg-black/10"
+              } ${n === stepNum ? "ring-2 ring-pine/30 ring-offset-1" : ""}`}
+            />
+          ))}
+        </div>
+        <div className="grid grid-cols-5 gap-1 text-center text-[10px] font-medium text-dusk">
+          {stepLabels.map((label, i) => (
+            <span key={label} className={i + 1 === stepNum ? "text-pine" : undefined}>
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
       {planHint && (
         <p className="rounded-xl bg-pine/10 px-3 py-2 text-sm text-pine">
           Your plan ready: <strong>{planHint}</strong>

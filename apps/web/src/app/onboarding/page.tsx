@@ -58,6 +58,7 @@ export default function OnboardingPage() {
           ifCue: p.ifCue,
           thenAction: p.thenAction,
           active: true,
+          origin: "ai" as const,
         })),
         daysPracticed: daysPracticed(loadState().checkIns),
       };

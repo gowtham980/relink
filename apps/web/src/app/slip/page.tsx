@@ -51,6 +51,7 @@ function SlipForm() {
             ifCue: cue,
             thenAction: next24h.trim(),
             active: true,
+            origin: "slip",
           },
           ...state.plans,
         ];

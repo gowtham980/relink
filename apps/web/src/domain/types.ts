@@ -5,11 +5,14 @@ export type HabitType =
   | "alcohol"
   | "custom";
 
+export type PlanOrigin = "ai" | "user" | "slip";
+
 export interface Plan {
   id: string;
   ifCue: string;
   thenAction: string;
   active: boolean;
+  origin?: PlanOrigin;
 }
 
 export interface CheckIn {
